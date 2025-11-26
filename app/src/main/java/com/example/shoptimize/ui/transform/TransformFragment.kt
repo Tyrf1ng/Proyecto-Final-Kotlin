@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.app.AlertDialog
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.EditText
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,20 +16,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
 import com.example.shoptimize.databinding.FragmentTransformBinding
-import com.example.shoptimize.databinding.ItemTransformBinding
+import com.example.shoptimize.databinding.ItemListaCompraBinding
 
-/**
- * Fragment that demonstrates a responsive layout pattern where the format of the content
- * transforms depending on the size of the screen. Specifically this Fragment shows items in
- * the [RecyclerView] using LinearLayoutManager in a small screen
- * and shows items using GridLayoutManager in a large screen.
- */
 class TransformFragment : Fragment() {
 
     private var _binding: FragmentTransformBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -42,8 +36,15 @@ class TransformFragment : Fragment() {
         val recyclerView = binding.recyclerviewTransform
         val adapter = TransformAdapter()
         recyclerView.adapter = adapter
-        transformViewModel.texts.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
+
+        transformViewModel.listas.observe(viewLifecycleOwner) { listas ->
+            adapter.submitList(listOfItemsFrom(listas))
+        }
+
+        binding.fabAddList?.setOnClickListener {
+            showCreateDialog { name ->
+                transformViewModel.addLista(name)
+            }
         }
         return root
     }
@@ -54,12 +55,12 @@ class TransformFragment : Fragment() {
     }
 
     class TransformAdapter :
-        ListAdapter<String, TransformViewHolder>(object : DiffUtil.ItemCallback<String>() {
+        ListAdapter<ListaItem, TransformViewHolder>(object : DiffUtil.ItemCallback<ListaItem>() {
 
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean =
-                oldItem == newItem
+            override fun areItemsTheSame(oldItem: ListaItem, newItem: ListaItem): Boolean =
+                oldItem.id == newItem.id
 
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
+            override fun areContentsTheSame(oldItem: ListaItem, newItem: ListaItem): Boolean =
                 oldItem == newItem
         }) {
 
@@ -69,36 +70,54 @@ class TransformFragment : Fragment() {
             R.drawable.avatar_3,
             R.drawable.avatar_4,
             R.drawable.avatar_5,
-            R.drawable.avatar_6,
-            R.drawable.avatar_7,
-            R.drawable.avatar_8,
-            R.drawable.avatar_9,
-            R.drawable.avatar_10,
-            R.drawable.avatar_11,
-            R.drawable.avatar_12,
-            R.drawable.avatar_13,
-            R.drawable.avatar_14,
-            R.drawable.avatar_15,
-            R.drawable.avatar_16,
+            R.drawable.avatar_6
         )
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransformViewHolder {
-            val binding = ItemTransformBinding.inflate(LayoutInflater.from(parent.context))
-            return TransformViewHolder(binding)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_lista_compra, parent, false)
+            return TransformViewHolder(ItemListaCompraBinding.bind(view))
         }
 
         override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-            holder.textView.text = getItem(position)
+            val item = getItem(position)
+            holder.textView.text = item.nombre
+            holder.textView.isSelected = true
+            holder.textFecha.text = item.fecha
+            holder.textTotal.text = "\$${item.total}"
+            val drawable = drawables[position % drawables.size]
             holder.imageView.setImageDrawable(
-                ResourcesCompat.getDrawable(holder.imageView.resources, drawables[position], null)
+                ResourcesCompat.getDrawable(holder.imageView.resources, drawable, null)
             )
         }
     }
 
-    class TransformViewHolder(binding: ItemTransformBinding) :
+    class TransformViewHolder(binding: ItemListaCompraBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        val imageView: ImageView = binding.imageViewItemTransform
-        val textView: TextView = binding.textViewItemTransform
+        val imageView: ImageView = binding.imageItem
+        val textView: TextView = binding.textNombre
+        val textFecha: TextView = binding.textFecha
+        val textTotal: TextView = binding.textTotal
     }
+
+    private fun listOfItemsFrom(listas: List<com.example.shoptimize.data.ListaDeCompra>): List<ListaItem> {
+        return listas.mapIndexed { index, l ->
+            ListaItem(id = index.toLong(), nombre = l.nombre, total = l.calculateTotal(), fecha = l.fecha)
+        }
+    }
+
+    private fun showCreateDialog(onCreate: (String) -> Unit) {
+        val edit = EditText(requireContext())
+        AlertDialog.Builder(requireContext())
+            .setTitle("Nueva lista")
+            .setView(edit)
+            .setPositiveButton("Crear") { _, _ ->
+                val name = edit.text.toString().ifBlank { "Nueva lista" }
+                onCreate(name)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    data class ListaItem(val id: Long, val nombre: String, val total: Int, val fecha: String)
 }
