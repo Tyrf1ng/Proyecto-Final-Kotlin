@@ -11,6 +11,7 @@ import android.widget.EditText
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +40,13 @@ class TransformFragment : Fragment() {
 
         transformViewModel.listas.observe(viewLifecycleOwner) { listas ->
             adapter.submitList(listOfItemsFrom(listas))
+        }
+
+        adapter.setItemClickListener { position ->
+            val bundle = Bundle().apply {
+                putInt("listaIndex", position)
+            }
+            findNavController().navigate(R.id.nav_lista_detalle, bundle)
         }
 
         binding.fabAddList?.setOnClickListener {
@@ -72,6 +80,11 @@ class TransformFragment : Fragment() {
             R.drawable.avatar_5,
             R.drawable.avatar_6
         )
+        private var onItemClickListener: ((Int) -> Unit)? = null
+
+        fun setItemClickListener(listener: (Int) -> Unit) {
+            onItemClickListener = listener
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransformViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_lista_compra, parent, false)
@@ -88,6 +101,9 @@ class TransformFragment : Fragment() {
             holder.imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(holder.imageView.resources, drawable, null)
             )
+            holder.itemView.setOnClickListener {
+                onItemClickListener?.invoke(position)
+            }
         }
     }
 
