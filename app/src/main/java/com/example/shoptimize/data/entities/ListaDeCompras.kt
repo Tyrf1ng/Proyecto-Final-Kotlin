@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
+import com.example.shoptimize.data.Producto
+
 @Entity(
     tableName = "lista_de_compras",
     foreignKeys = [

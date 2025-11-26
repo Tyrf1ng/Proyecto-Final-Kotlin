@@ -9,7 +9,22 @@
         android:id="@+id/nav_transform"
         android:name="com.example.shoptimize.ui.transform.TransformFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_transform" />
+        tools:layout="@layout/fragment_transform">
+        <action
+            android:id="@+id/action_nav_transform_to_listDetalle"
+            app:destination="@id/nav_lista_detalle" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_lista_detalle"
+        android:name="com.example.shoptimize.ui.detalle.ListaDetalleFragment"
+        android:label="Compras"
+        tools:layout="@layout/fragment_lista_detalle">
+        <argument
+            android:name="listaIndex"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_reflow"
