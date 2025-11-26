@@ -3,7 +3,7 @@ package com.example.shoptimize.data.relations
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.example.shoptimize.data.entities.ListaDeCompras
-import com.example.shoptimize.data.entities.Producto
+import com.example.shoptimize.data.Producto
 
 data class ListaConProductos(
     @Embedded val lista: ListaDeCompras,
