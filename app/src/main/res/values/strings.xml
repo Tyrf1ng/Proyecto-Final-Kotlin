@@ -26,6 +26,13 @@
     <string name="image_view_item_transform_content_description">Represents an image view in the
         item
     </string>
+    
+    <string name="profile_image">Imagen de Perfil</string>
+    <string name="profile_name_label">Nombre</string>
+    <string name="enter_name">Ingrese su nombre</string>
+    <string name="change_avatar">Cambiar Avatar</string>
+    <string name="save_profile">Guardar</string>
+    <string name="profile_info">Haz clic en "Cambiar Avatar" para seleccionar un nuevo avatar</string>
 
     <string-array name="months">
         <item>Enero</item>
