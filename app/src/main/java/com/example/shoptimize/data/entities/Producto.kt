@@ -1,4 +1,11 @@
-package com.example.shoptimize.data.entities
+package com.example.shoptimize.data
 
-class Producto {
+data class Producto(
+    val nombre: String,
+    val precio: Int,
+    val categoria: String
+) {
+    fun setearPrecio(): Int {
+        return precio
+    }
 }
