@@ -5,17 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.example.shoptimize.R
-import com.example.shoptimize.data.CatalogRepository
-import com.example.shoptimize.data.Producto
 import com.example.shoptimize.databinding.FragmentReflowBinding
-import com.example.shoptimize.databinding.ItemCatalogoProductoBinding
 
 class ReflowFragment : Fragment() {
 
@@ -30,69 +22,21 @@ class ReflowFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val reflowViewModel =
+            ViewModelProvider(this).get(ReflowViewModel::class.java)
+
         _binding = FragmentReflowBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val adapter = CatalogoAdapter()
-        binding.recyclerviewCatalogo.adapter = adapter
-
-        val productos = CatalogRepository.getProductos()
-        adapter.submitList(productos)
-
-        binding.searchProductos.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                val filtered = if (newText.isNullOrBlank()) {
-                    productos
-                } else {
-                    productos.filter {
-                        it.nombre.contains(newText, ignoreCase = true) ||
-                        it.categoria.contains(newText, ignoreCase = true)
-                    }
-                }
-                adapter.submitList(filtered)
-                return true
-            }
-        })
-
+        val textView: TextView = binding.textReflow
+        reflowViewModel.text.observe(viewLifecycleOwner) {
+            textView.text = it
+        }
         return root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    class CatalogoAdapter :
-        ListAdapter<Producto, CatalogoViewHolder>(object : DiffUtil.ItemCallback<Producto>() {
-
-            override fun areItemsTheSame(oldItem: Producto, newItem: Producto): Boolean =
-                oldItem.nombre == newItem.nombre
-
-            override fun areContentsTheSame(oldItem: Producto, newItem: Producto): Boolean =
-                oldItem == newItem
-        }) {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatalogoViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_catalogo_producto, parent, false)
-            return CatalogoViewHolder(ItemCatalogoProductoBinding.bind(view))
-        }
-
-        override fun onBindViewHolder(holder: CatalogoViewHolder, position: Int) {
-            val producto = getItem(position)
-            holder.nombre.text = producto.nombre
-            holder.precio.text = "\$${producto.precio}"
-            holder.categoria.text = producto.categoria
-        }
-    }
-
-    class CatalogoViewHolder(binding: ItemCatalogoProductoBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        val nombre: TextView = binding.textCatalogoNombre
-        val precio: TextView = binding.textCatalogoPrecio
-        val categoria: TextView = binding.textCatalogoCategoria
-        val btnAgregar = binding.btnAgregar
     }
 }
