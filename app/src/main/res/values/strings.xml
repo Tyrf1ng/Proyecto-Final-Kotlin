@@ -13,7 +13,7 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_home">Inicio</string>
     <string name="menu_list">Catálogo</string>
-    <string name="menu_historial">Historial</string>
+    <string name="menu_historial">Historial de listas de compra</string>
     <string name="menu_profile">Perfil</string>
 
     <string name="lorem_ipsum_title">Lorem Ipsum"</string>
@@ -26,4 +26,26 @@
     <string name="image_view_item_transform_content_description">Represents an image view in the
         item
     </string>
+    
+    <string name="profile_image">Imagen de Perfil</string>
+    <string name="profile_name_label">Nombre</string>
+    <string name="enter_name">Ingrese su nombre</string>
+    <string name="change_avatar">Cambiar Avatar</string>
+    <string name="save_profile">Guardar</string>
+    <string name="profile_info">Haz clic en "Cambiar Avatar" para seleccionar un nuevo avatar</string>
+
+    <string-array name="months">
+        <item>Enero</item>
+        <item>Febrero</item>
+        <item>Marzo</item>
+        <item>Abril</item>
+        <item>Mayo</item>
+        <item>Junio</item>
+        <item>Julio</item>
+        <item>Agosto</item>
+        <item>Septiembre</item>
+        <item>Octubre</item>
+        <item>Noviembre</item>
+        <item>Diciembre</item>
+    </string-array>
 </resources>
