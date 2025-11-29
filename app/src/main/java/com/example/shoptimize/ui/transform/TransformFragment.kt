@@ -39,7 +39,7 @@ class TransformFragment : Fragment() {
         recyclerView.adapter = adapter
 
         transformViewModel.listas.observe(viewLifecycleOwner) { listas ->
-            adapter.submitList(listas)
+            adapter.submitList(listOfItemsFrom(listas))
         }
 
         adapter.setItemClickListener { position ->
@@ -63,17 +63,13 @@ class TransformFragment : Fragment() {
     }
 
     class TransformAdapter :
-        ListAdapter<com.example.shoptimize.data.ListaDeCompra, TransformViewHolder>(object : DiffUtil.ItemCallback<com.example.shoptimize.data.ListaDeCompra>() {
+        ListAdapter<ListaItem, TransformViewHolder>(object : DiffUtil.ItemCallback<ListaItem>() {
 
-            override fun areItemsTheSame(oldItem: com.example.shoptimize.data.ListaDeCompra, newItem: com.example.shoptimize.data.ListaDeCompra): Boolean =
+            override fun areItemsTheSame(oldItem: ListaItem, newItem: ListaItem): Boolean =
                 oldItem.id == newItem.id
 
-            override fun areContentsTheSame(oldItem: com.example.shoptimize.data.ListaDeCompra, newItem: com.example.shoptimize.data.ListaDeCompra): Boolean {
-                return oldItem.nombre == newItem.nombre && 
-                       oldItem.fecha == newItem.fecha && 
-                       oldItem.productos.size == newItem.productos.size &&
-                       oldItem.calculateTotal() == newItem.calculateTotal()
-            }
+            override fun areContentsTheSame(oldItem: ListaItem, newItem: ListaItem): Boolean =
+                oldItem == newItem
         }) {
 
         private val drawables = listOf(
@@ -96,11 +92,11 @@ class TransformFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-            val lista = getItem(position)
-            holder.textView.text = lista.nombre
+            val item = getItem(position)
+            holder.textView.text = item.nombre
             holder.textView.isSelected = true
-            holder.textFecha.text = lista.fecha
-            holder.textTotal.text = "\$${lista.calculateTotal()}"
+            holder.textFecha.text = item.fecha
+            holder.textTotal.text = "\$${item.total}"
             val drawable = drawables[position % drawables.size]
             holder.imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(holder.imageView.resources, drawable, null)
@@ -120,6 +116,12 @@ class TransformFragment : Fragment() {
         val textTotal: TextView = binding.textTotal
     }
 
+    private fun listOfItemsFrom(listas: List<com.example.shoptimize.data.ListaDeCompra>): List<ListaItem> {
+        return listas.mapIndexed { index, l ->
+            ListaItem(id = index.toLong(), nombre = l.nombre, total = l.calculateTotal(), fecha = l.fecha)
+        }
+    }
+
     private fun showCreateDialog(onCreate: (String) -> Unit) {
         val edit = EditText(requireContext())
         AlertDialog.Builder(requireContext())
@@ -132,4 +134,6 @@ class TransformFragment : Fragment() {
             .setNegativeButton("Cancelar", null)
             .show()
     }
+
+    data class ListaItem(val id: Long, val nombre: String, val total: Int, val fecha: String)
 }

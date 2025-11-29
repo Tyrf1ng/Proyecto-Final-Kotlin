@@ -66,21 +66,13 @@ class HistoryViewModel : ViewModel() {
         repeat(20) { i ->
             calendar.add(Calendar.DAY_OF_MONTH, -7) // Una compra cada semana
             val fecha = dateFormat.format(calendar.time)
-            val purchase = ListaDeCompra(
-                nombre = "Compra ${i + 1}",
-                fecha = fecha
-            )
-            // Agregar productos de ejemplo para que el total se calcule
-            repeat((i % 3) + 1) { j ->
-                purchase.productos.add(
-                    com.example.shoptimize.data.Producto(
-                        nombre = "Producto ${j + 1}",
-                        precio = (50 + i * 25) / ((i % 3) + 1),
-                        categoria = "Categoría ${j + 1}"
-                    )
+            purchases.add(
+                ListaDeCompra(
+                    nombre = "Compra ${i + 1}",
+                    total = (50 + i * 25),
+                    fecha = fecha
                 )
-            }
-            purchases.add(purchase)
+            )
         }
 
         return purchases.reversed()
