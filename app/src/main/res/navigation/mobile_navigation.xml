@@ -28,9 +28,9 @@
 
     <fragment
         android:id="@+id/nav_reflow"
-        android:name="com.example.shoptimize.ui.reflow.ReflowFragment"
+        android:name="com.example.shoptimize.ui.reflow.ProductsFragment"
         android:label="@string/menu_list"
-        tools:layout="@layout/fragment_reflow" />
+        tools:layout="@layout/fragment_products" />
 
     <fragment
         android:id="@+id/nav_slideshow"
@@ -40,7 +40,7 @@
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.example.shoptimize.ui.settings.SettingsFragment"
+        android:name="com.example.shoptimize.ui.history.HistoryFragment"
         android:label="@string/menu_historial"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/history_lists" />
 </navigation>
