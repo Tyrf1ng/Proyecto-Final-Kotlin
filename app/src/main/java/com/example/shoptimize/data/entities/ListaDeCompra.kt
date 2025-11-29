@@ -1,10 +1,13 @@
 package com.example.shoptimize.data
 
+import java.util.UUID
+
 data class ListaDeCompra(
     val nombre: String,
     val total: Int = 0,
     val fecha: String,
-    val productos: MutableList<Producto> = mutableListOf()
+    val productos: MutableList<Producto> = mutableListOf(),
+    val id: String = UUID.randomUUID().toString()
 ) {
     fun createProduct(): Producto {
         return Producto("", 0, "")
