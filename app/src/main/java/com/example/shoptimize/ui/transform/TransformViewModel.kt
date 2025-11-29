@@ -80,7 +80,6 @@ class TransformViewModel : ViewModel() {
     fun updateListaProductos(index: Int, productos: List<com.example.shoptimize.data.Producto>) {
         val current = _listas.value ?: return
         if (index >= 0 && index < current.size) {
-            // Crear una nueva ListaDeCompra con los mismos datos pero un ID nuevo
             val listaActualizada = current[index].copy(
                 nombre = current[index].nombre,
                 total = 0,
@@ -88,7 +87,6 @@ class TransformViewModel : ViewModel() {
                 productos = productos.toMutableList()
             )
             current[index] = listaActualizada
-            // Forzar actualización completa
             val newList = mutableListOf<ListaDeCompra>()
             newList.addAll(current)
             _listas.value = newList
