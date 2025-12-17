@@ -7,24 +7,27 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
-import com.example.shoptimize.data.CatalogRepository
 import com.example.shoptimize.data.Producto
+import com.example.shoptimize.data.database.ShoptimizeDatabase
+import com.example.shoptimize.data.repository.ListaDeCompraRepository
 import com.example.shoptimize.databinding.FragmentSeleccionarProductoBinding
-import com.example.shoptimize.databinding.ItemCatalogoProductoBinding
-import com.example.shoptimize.ui.transform.TransformViewModel
+import com.example.shoptimize.databinding.ItemProductoSeleccionarBinding
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class SeleccionarProductoFragment : Fragment() {
 
     private var _binding: FragmentSeleccionarProductoBinding? = null
     private val binding get() = _binding!!
-    private var listaIndex: Int = 0
-    private var transformViewModel: TransformViewModel? = null
+    private var listaId: Int = 0
+    private lateinit var repository: ListaDeCompraRepository
+    private var allProductos: List<Producto> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,25 +41,33 @@ class SeleccionarProductoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        listaIndex = arguments?.getInt("listaIndex") ?: 0
-        transformViewModel = ViewModelProvider(requireActivity()).get(TransformViewModel::class.java)
+        listaId = arguments?.getInt("listaId") ?: 0
+        
+        val database = ShoptimizeDatabase.getInstance(requireContext())
+        repository = ListaDeCompraRepository(
+            database.listaDeCompraDao(),
+            database.listaProductoCrossRefDao()
+        )
 
         val adapter = SeleccionarProductoAdapter { producto ->
             agregarProductoALista(producto)
         }
         binding.recyclerviewCatalogoSeleccionar.adapter = adapter
 
-        val productos = CatalogRepository.getProductos()
-        adapter.submitList(productos)
+        // Cargar productos
+        lifecycleScope.launch {
+            allProductos = database.productoDao().getAllProductos().first()
+            adapter.submitList(allProductos)
+        }
 
         binding.searchCatalogo.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 val filtered = if (newText.isNullOrBlank()) {
-                    productos
+                    allProductos
                 } else {
-                    productos.filter {
+                    allProductos.filter {
                         it.nombre.contains(newText, ignoreCase = true) ||
                         it.categoria.contains(newText, ignoreCase = true)
                     }
@@ -68,15 +79,30 @@ class SeleccionarProductoFragment : Fragment() {
     }
 
     private fun agregarProductoALista(producto: Producto) {
-        transformViewModel?.listas?.value?.let { listas ->
-            if (listaIndex >= 0 && listaIndex < listas.size) {
-                val lista = listas[listaIndex]
-                val productosActuales = lista.productos.toMutableList()
-                productosActuales.add(producto)
-                transformViewModel?.updateListaProductos(listaIndex, productosActuales)
-            }
+        val inputCantidad = android.widget.EditText(requireContext()).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText("1")
+            hint = "Cantidad"
         }
-        findNavController().popBackStack()
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Agregar ${producto.nombre}")
+            .setMessage("Precio: \$${producto.precio}")
+            .setView(inputCantidad)
+            .setPositiveButton("Agregar") { _, _ ->
+                val cantidad = inputCantidad.text.toString().toIntOrNull() ?: 1
+                lifecycleScope.launch {
+                    repository.addProductoToLista(listaId, producto.id, cantidad)
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "Agregado: ${producto.nombre} x$cantidad",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().popBackStack()
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onDestroyView() {
@@ -88,15 +114,15 @@ class SeleccionarProductoFragment : Fragment() {
         ListAdapter<Producto, SeleccionarProductoViewHolder>(object : DiffUtil.ItemCallback<Producto>() {
 
             override fun areItemsTheSame(oldItem: Producto, newItem: Producto): Boolean =
-                oldItem.nombre == newItem.nombre
+                oldItem.id == newItem.id
 
             override fun areContentsTheSame(oldItem: Producto, newItem: Producto): Boolean =
                 oldItem == newItem
         }) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeleccionarProductoViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_catalogo_producto, parent, false)
-            return SeleccionarProductoViewHolder(ItemCatalogoProductoBinding.bind(view), onProductoClick)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_producto_seleccionar, parent, false)
+            return SeleccionarProductoViewHolder(ItemProductoSeleccionarBinding.bind(view), onProductoClick)
         }
 
         override fun onBindViewHolder(holder: SeleccionarProductoViewHolder, position: Int) {
@@ -106,7 +132,7 @@ class SeleccionarProductoFragment : Fragment() {
     }
 
     class SeleccionarProductoViewHolder(
-        binding: ItemCatalogoProductoBinding,
+        binding: ItemProductoSeleccionarBinding,
         private val onProductoClick: (Producto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
