@@ -49,7 +49,17 @@
         android:textColor="@android:color/darker_gray"
         app:layout_constraintStart_toStartOf="@id/text_nombre"
         app:layout_constraintTop_toBottomOf="@id/text_nombre"
-        app:layout_constraintEnd_toStartOf="@id/text_total"
+        app:layout_constraintEnd_toStartOf="@id/btn_delete_lista"
         android:layout_marginTop="4dp" />
+
+    <ImageView
+        android:id="@+id/btn_delete_lista"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="Eliminar lista"
+        android:scaleType="centerInside"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/ic_delete" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

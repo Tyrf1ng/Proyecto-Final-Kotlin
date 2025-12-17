@@ -60,14 +60,13 @@
             app:layout_constraintTop_toBottomOf="@id/text_catalogo_precio" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_eliminar"
+            android:id="@+id/btn_agregar"
             android:layout_width="0dp"
             android:layout_height="44dp"
-            android:text="Eliminar"
+            android:text="Agregar"
             android:textSize="12sp"
             android:layout_marginTop="8dp"
             app:cornerRadius="4dp"
-            app:backgroundTint="@android:color/holo_red_light"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_catalogo_categoria" />

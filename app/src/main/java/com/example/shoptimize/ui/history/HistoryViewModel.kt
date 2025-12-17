@@ -1,29 +1,38 @@
 package com.example.shoptimize.ui.history
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.shoptimize.data.ListaDeCompra
+import androidx.lifecycle.asLiveData
+import com.example.shoptimize.data.database.ShoptimizeDatabase
+import com.example.shoptimize.data.relations.ListaConProductos
+import com.example.shoptimize.data.repository.ListaDeCompraRepository
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HistoryViewModel : ViewModel() {
+class HistoryViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _allPurchases = MutableLiveData<List<ListaDeCompra>>().apply {
-        value = generateSamplePurchases()
-    }
+    private val database = ShoptimizeDatabase.getInstance(application)
+    private val repository = ListaDeCompraRepository(
+        database.listaDeCompraDao(),
+        database.listaProductoCrossRefDao()
+    )
+
+    private val _allPurchases: LiveData<List<ListaConProductos>> = 
+        repository.allListasConProductos.asLiveData()
 
     private val _selectedMonth = MutableLiveData<Int>()
     private val _selectedYear = MutableLiveData<Int>()
 
-    val filteredPurchases: LiveData<List<ListaDeCompra>> = MediatorLiveData<List<ListaDeCompra>>().apply {
+    val filteredPurchases: LiveData<List<ListaConProductos>> = MediatorLiveData<List<ListaConProductos>>().apply {
         addSource(_allPurchases) { filterPurchases() }
         addSource(_selectedMonth) { filterPurchases() }
         addSource(_selectedYear) { filterPurchases() }
     }
 
-    private fun MediatorLiveData<List<ListaDeCompra>>.filterPurchases() {
+    private fun MediatorLiveData<List<ListaConProductos>>.filterPurchases() {
         val all = _allPurchases.value ?: emptyList()
         val month = _selectedMonth.value
         val year = _selectedYear.value
@@ -32,7 +41,7 @@ class HistoryViewModel : ViewModel() {
             val calendar = Calendar.getInstance()
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             try {
-                calendar.time = dateFormat.parse(purchase.fecha) ?: Date()
+                calendar.time = dateFormat.parse(purchase.lista.fecha) ?: Date()
                 val purchaseMonth = calendar.get(Calendar.MONTH) + 1
                 val purchaseYear = calendar.get(Calendar.YEAR)
 
@@ -55,34 +64,5 @@ class HistoryViewModel : ViewModel() {
     fun getAvailableYears(): List<String> {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         return (currentYear downTo currentYear - 5).map { it.toString() }
-    }
-
-    private fun generateSamplePurchases(): List<ListaDeCompra> {
-        val purchases = mutableListOf<ListaDeCompra>()
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        // Generar compras de ejemplo para los últimos 6 meses
-        repeat(20) { i ->
-            calendar.add(Calendar.DAY_OF_MONTH, -7) // Una compra cada semana
-            val fecha = dateFormat.format(calendar.time)
-            val purchase = ListaDeCompra(
-                nombre = "Compra ${i + 1}",
-                fecha = fecha
-            )
-            // Agregar productos de ejemplo para que el total se calcule
-            repeat((i % 3) + 1) { j ->
-                purchase.productos.add(
-                    com.example.shoptimize.data.Producto(
-                        nombre = "Producto ${j + 1}",
-                        precio = (50 + i * 25) / ((i % 3) + 1),
-                        categoria = "Categoría ${j + 1}"
-                    )
-                )
-            }
-            purchases.add(purchase)
-        }
-
-        return purchases.reversed()
     }
 }
