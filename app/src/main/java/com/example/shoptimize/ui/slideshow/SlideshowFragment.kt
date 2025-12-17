@@ -1,10 +1,12 @@
 package com.example.shoptimize.ui.slideshow
 
 import android.os.Bundle
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.shoptimize.R
@@ -17,7 +19,6 @@ class SlideshowFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: SlideshowViewModel
 
-    // Lista de avatares disponibles
     private val avatarsList = listOf(
         R.drawable.avatar_1, R.drawable.avatar_2, R.drawable.avatar_3,
         R.drawable.avatar_4, R.drawable.avatar_5, R.drawable.avatar_6,
@@ -43,24 +44,20 @@ class SlideshowFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        // Observar cambios en el nombre del perfil
         viewModel.profileName.observe(viewLifecycleOwner) { name ->
             binding.tietProfileName.setText(name)
         }
 
-        // Observar cambios en el avatar
         viewModel.selectedAvatarResId.observe(viewLifecycleOwner) { resId ->
             binding.ivProfileImage.setImageResource(resId)
         }
     }
 
     private fun setupListeners() {
-        // Botón para cambiar avatar
         binding.btnChangeAvatar.setOnClickListener {
             showAvatarSelectionDialog()
         }
 
-        // Botón para guardar perfil
         binding.btnSaveProfile.setOnClickListener {
             val newName = binding.tietProfileName.text.toString().trim()
             if (newName.isEmpty()) {
@@ -75,6 +72,12 @@ class SlideshowFragment : Fragment() {
             val message = viewModel.saveProfile()
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
+
+        binding.btnToggleTheme.setOnClickListener {
+            toggleTheme()
+        }
+
+        updateThemeButtonLabel(getSavedTheme())
     }
 
     private fun showAvatarSelectionDialog() {
@@ -87,6 +90,33 @@ class SlideshowFragment : Fragment() {
                 viewModel.updateAvatarResId(selectedAvatar)
             }
             .show()
+    }
+
+    private fun toggleTheme() {
+        val prefs = requireContext().getSharedPreferences("shoptimize_prefs", Context.MODE_PRIVATE)
+        val current = getSavedTheme()
+        val next = if (current == "night") "day" else "night"
+        applyTheme(next)
+        prefs.edit().putString("theme_mode", next).apply()
+        updateThemeButtonLabel(next)
+        Toast.makeText(requireContext(), if (next == "night") "Modo oscuro activado" else "Modo claro activado", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun applyTheme(mode: String) {
+        when (mode) {
+            "night" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            "day" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+    }
+
+    private fun getSavedTheme(): String {
+        val prefs = requireContext().getSharedPreferences("shoptimize_prefs", Context.MODE_PRIVATE)
+        return prefs.getString("theme_mode", "system") ?: "system"
+    }
+
+    private fun updateThemeButtonLabel(mode: String) {
+        binding.btnToggleTheme.text = if (mode == "night") "Usar modo claro" else "Usar modo oscuro"
     }
 
     override fun onDestroyView() {
