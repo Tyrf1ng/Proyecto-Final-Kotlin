@@ -13,7 +13,7 @@ import com.example.shoptimize.R
 import com.example.shoptimize.data.CatalogRepository
 import com.example.shoptimize.data.Producto
 import com.example.shoptimize.databinding.FragmentAgregarProductoBinding
-import com.example.shoptimize.databinding.ItemCatalogoProductoBinding
+import com.example.shoptimize.databinding.ItemProductoSeleccionarBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
@@ -81,8 +81,8 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
         }) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoSheetViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_catalogo_producto, parent, false)
-            return ProductoSheetViewHolder(ItemCatalogoProductoBinding.bind(view), onItemClick)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_producto_seleccionar, parent, false)
+            return ProductoSheetViewHolder(ItemProductoSeleccionarBinding.bind(view), onItemClick)
         }
 
         override fun onBindViewHolder(holder: ProductoSheetViewHolder, position: Int) {
@@ -95,7 +95,7 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
     }
 
     class ProductoSheetViewHolder(
-        binding: ItemCatalogoProductoBinding,
+        binding: ItemProductoSeleccionarBinding,
         private val onItemClick: (Producto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 

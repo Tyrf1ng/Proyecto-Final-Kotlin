@@ -8,6 +8,7 @@ import android.app.AlertDialog
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.EditText
+import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -18,19 +19,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
 import com.example.shoptimize.databinding.FragmentTransformBinding
 import com.example.shoptimize.databinding.ItemListaCompraBinding
+import com.example.shoptimize.data.relations.ListaConProductos
 
 class TransformFragment : Fragment() {
 
     private var _binding: FragmentTransformBinding? = null
-
     private val binding get() = _binding!!
+    private lateinit var transformViewModel: TransformViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val transformViewModel = ViewModelProvider(this).get(TransformViewModel::class.java)
+        transformViewModel = ViewModelProvider(this).get(TransformViewModel::class.java)
         _binding = FragmentTransformBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -38,15 +40,19 @@ class TransformFragment : Fragment() {
         val adapter = TransformAdapter()
         recyclerView.adapter = adapter
 
-        transformViewModel.listas.observe(viewLifecycleOwner) { listas ->
+        transformViewModel.listasConProductos.observe(viewLifecycleOwner) { listas ->
             adapter.submitList(listas)
         }
 
-        adapter.setItemClickListener { position ->
+        adapter.setItemClickListener { listaId ->
             val bundle = Bundle().apply {
-                putInt("listaIndex", position)
+                putInt("listaId", listaId)
             }
             findNavController().navigate(R.id.nav_lista_detalle, bundle)
+        }
+
+        adapter.setDeleteListener { listaConProductos ->
+            mostrarDialogoConfirmarEliminacion(listaConProductos)
         }
 
         binding.fabAddList?.setOnClickListener {
@@ -63,14 +69,14 @@ class TransformFragment : Fragment() {
     }
 
     class TransformAdapter :
-        ListAdapter<com.example.shoptimize.data.ListaDeCompra, TransformViewHolder>(object : DiffUtil.ItemCallback<com.example.shoptimize.data.ListaDeCompra>() {
+        ListAdapter<ListaConProductos, TransformViewHolder>(object : DiffUtil.ItemCallback<ListaConProductos>() {
 
-            override fun areItemsTheSame(oldItem: com.example.shoptimize.data.ListaDeCompra, newItem: com.example.shoptimize.data.ListaDeCompra): Boolean =
-                oldItem.id == newItem.id
+            override fun areItemsTheSame(oldItem: ListaConProductos, newItem: ListaConProductos): Boolean =
+                oldItem.lista.id == newItem.lista.id
 
-            override fun areContentsTheSame(oldItem: com.example.shoptimize.data.ListaDeCompra, newItem: com.example.shoptimize.data.ListaDeCompra): Boolean {
-                return oldItem.nombre == newItem.nombre && 
-                       oldItem.fecha == newItem.fecha && 
+            override fun areContentsTheSame(oldItem: ListaConProductos, newItem: ListaConProductos): Boolean {
+                return oldItem.lista.nombre == newItem.lista.nombre && 
+                       oldItem.lista.fecha == newItem.lista.fecha && 
                        oldItem.productos.size == newItem.productos.size &&
                        oldItem.calculateTotal() == newItem.calculateTotal()
             }
@@ -85,9 +91,14 @@ class TransformFragment : Fragment() {
             R.drawable.avatar_6
         )
         private var onItemClickListener: ((Int) -> Unit)? = null
+        private var onDeleteListener: ((ListaConProductos) -> Unit)? = null
 
         fun setItemClickListener(listener: (Int) -> Unit) {
             onItemClickListener = listener
+        }
+
+        fun setDeleteListener(listener: (ListaConProductos) -> Unit) {
+            onDeleteListener = listener
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransformViewHolder {
@@ -96,17 +107,21 @@ class TransformFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: TransformViewHolder, position: Int) {
-            val lista = getItem(position)
+            val listaConProductos = getItem(position)
+            val lista = listaConProductos.lista
             holder.textView.text = lista.nombre
             holder.textView.isSelected = true
             holder.textFecha.text = lista.fecha
-            holder.textTotal.text = "\$${lista.calculateTotal()}"
+            holder.textTotal.text = "\$${lista.total}"
             val drawable = drawables[position % drawables.size]
             holder.imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(holder.imageView.resources, drawable, null)
             )
             holder.itemView.setOnClickListener {
-                onItemClickListener?.invoke(position)
+                onItemClickListener?.invoke(lista.id)
+            }
+            holder.btnDelete.setOnClickListener {
+                onDeleteListener?.invoke(listaConProductos)
             }
         }
     }
@@ -118,6 +133,7 @@ class TransformFragment : Fragment() {
         val textView: TextView = binding.textNombre
         val textFecha: TextView = binding.textFecha
         val textTotal: TextView = binding.textTotal
+        val btnDelete: ImageView = binding.btnDeleteLista
     }
 
     private fun showCreateDialog(onCreate: (String) -> Unit) {
@@ -128,6 +144,18 @@ class TransformFragment : Fragment() {
             .setPositiveButton("Crear") { _, _ ->
                 val name = edit.text.toString().ifBlank { "Nueva lista" }
                 onCreate(name)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun mostrarDialogoConfirmarEliminacion(listaConProductos: ListaConProductos) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Eliminar lista")
+            .setMessage("¿Estás seguro de que deseas eliminar la lista \"${listaConProductos.lista.nombre}\"?")
+            .setPositiveButton("Eliminar") { _, _ ->
+                transformViewModel.deleteLista(listaConProductos.lista)
+                Toast.makeText(requireContext(), "Lista eliminada", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
             .show()
