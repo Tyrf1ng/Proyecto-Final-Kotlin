@@ -1,11 +1,17 @@
 package com.example.shoptimize.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "productos")
 data class Producto(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val nombre: String,
-    val precio: Int,
+    var precio: Int,
     val categoria: String
 ) {
-    fun setearPrecio(): Int {
-        return precio
+    fun setearPrecio(nuevoPrecio: Int) {
+        precio = nuevoPrecio
     }
 }

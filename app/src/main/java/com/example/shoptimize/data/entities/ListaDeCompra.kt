@@ -1,23 +1,28 @@
 package com.example.shoptimize.data
 
-import java.util.UUID
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.ForeignKey
+import androidx.room.Index
 
+@Entity(
+    tableName = "listas_de_compra",
+    indices = [Index(value = ["usuarioId"])]
+)
 data class ListaDeCompra(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val nombre: String,
-    val total: Int = 0,
+    var total: Int = 0,
     val fecha: String,
-    val productos: MutableList<Producto> = mutableListOf(),
-    val id: String = UUID.randomUUID().toString()
+    val usuarioId: Int? = null
 ) {
     fun createProduct(): Producto {
-        return Producto("", 0, "")
+        return Producto(nombre = "", precio = 0, categoria = "")
     }
     
-    fun addProduct(producto: Producto) {
-        productos.add(producto)
-    }
-    
-    fun calculateTotal(): Int {
-        return productos.sumOf { it.precio }
+    fun calculateTotal(productos: List<Producto>): Int {
+        total = productos.sumOf { it.precio }
+        return total
     }
 }
