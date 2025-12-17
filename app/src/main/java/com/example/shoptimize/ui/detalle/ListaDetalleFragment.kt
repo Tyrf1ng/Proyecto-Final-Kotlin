@@ -8,23 +8,32 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
 import com.example.shoptimize.data.Producto
+import com.example.shoptimize.data.database.ShoptimizeDatabase
+import com.example.shoptimize.data.repository.ListaDeCompraRepository
 import com.example.shoptimize.databinding.FragmentListaDetalleBinding
 import com.example.shoptimize.databinding.ItemProductoBinding
-import com.example.shoptimize.ui.transform.TransformViewModel
+import kotlinx.coroutines.launch
+
+data class ProductoConCantidad(
+    val producto: Producto,
+    val cantidad: Int
+)
 
 class ListaDetalleFragment : Fragment() {
 
     private var _binding: FragmentListaDetalleBinding? = null
     private val binding get() = _binding!!
-    private var listaIndex: Int = 0
-    private val productosAgregados = mutableListOf<Producto>()
-    private var transformViewModel: TransformViewModel? = null
+    private var listaId: Int = 0
+    private lateinit var repository: ListaDeCompraRepository
+    private lateinit var database: ShoptimizeDatabase
+    private lateinit var adapter: ProductoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,38 +43,64 @@ class ListaDetalleFragment : Fragment() {
         _binding = FragmentListaDetalleBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        listaIndex = arguments?.getInt("listaIndex") ?: 0
-        transformViewModel = ViewModelProvider(requireActivity()).get(TransformViewModel::class.java)
+        listaId = arguments?.getInt("listaId") ?: 0
+        
+        database = ShoptimizeDatabase.getInstance(requireContext())
+        repository = ListaDeCompraRepository(
+            database.listaDeCompraDao(),
+            database.listaProductoCrossRefDao()
+        )
 
-        val adapter = ProductoAdapter()
+        adapter = ProductoAdapter()
         binding.recyclerviewProductos.adapter = adapter
 
-        adapter.setOnDeleteListener { position ->
-            if (position >= 0 && position < productosAgregados.size) {
-                productosAgregados.removeAt(position)
-                transformViewModel?.updateListaProductos(listaIndex, productosAgregados.toList())
+        adapter.setOnDeleteListener { productoConCantidad ->
+            lifecycleScope.launch {
+                repository.removeProductoFromLista(listaId, productoConCantidad.producto.id)
+                cargarProductos()
             }
         }
 
-        transformViewModel?.listas?.observe(viewLifecycleOwner) { listas ->
-            if (listaIndex < listas.size) {
-                val lista = listas[listaIndex]
-                productosAgregados.clear()
-                productosAgregados.addAll(lista.productos)
-                adapter.submitList(productosAgregados.toList())
-                val total = lista.calculateTotal()
-                binding.textTotalLista.text = "\$$total"
-            }
+        // Cargar productos inicialmente
+        lifecycleScope.launch {
+            cargarProductos()
         }
 
         binding.fabAddProducto.setOnClickListener {
             val bundle = Bundle().apply {
-                putInt("listaIndex", listaIndex)
+                putInt("listaId", listaId)
             }
             findNavController().navigate(R.id.action_lista_detalle_to_seleccionar_producto, bundle)
         }
 
         return root
+    }
+
+    private suspend fun cargarProductos() {
+        // Obtener la lista con productos
+        val listaConProductos = database.listaDeCompraDao().getListaConProductos(listaId)
+        
+        if (listaConProductos != null) {
+            val crossRefs = database.listaProductoCrossRefDao().getCrossRefsByLista(listaId)
+            
+            val cantidadMap = crossRefs.associate { it.productoId to it.cantidad }
+            
+            // Mapear productos con su cantidad
+            val productosConCantidad = listaConProductos.productos.map { producto ->
+                ProductoConCantidad(
+                    producto = producto,
+                    cantidad = cantidadMap[producto.id] ?: 1
+                )
+            }
+            
+            adapter.submitList(productosConCantidad)
+            
+            // Calcular total sumando precio × cantidad
+            val total = productosConCantidad.sumOf { it.producto.precio * it.cantidad }
+            binding.textTotalLista.text = "\$$total"
+                // Sincronizar total calculado en la base de datos para mantener la tarjeta en lista de compras coherente
+                database.listaDeCompraDao().updateListaTotal(listaId, total)
+        }
     }
 
     override fun onDestroyView() {
@@ -74,18 +109,18 @@ class ListaDetalleFragment : Fragment() {
     }
 
     class ProductoAdapter :
-        ListAdapter<Producto, ProductoViewHolder>(object : DiffUtil.ItemCallback<Producto>() {
+        ListAdapter<ProductoConCantidad, ProductoViewHolder>(object : DiffUtil.ItemCallback<ProductoConCantidad>() {
 
-            override fun areItemsTheSame(oldItem: Producto, newItem: Producto): Boolean =
-                oldItem.nombre == newItem.nombre
+            override fun areItemsTheSame(oldItem: ProductoConCantidad, newItem: ProductoConCantidad): Boolean =
+                oldItem.producto.id == newItem.producto.id
 
-            override fun areContentsTheSame(oldItem: Producto, newItem: Producto): Boolean =
+            override fun areContentsTheSame(oldItem: ProductoConCantidad, newItem: ProductoConCantidad): Boolean =
                 oldItem == newItem
         }) {
 
-        private var onDeleteListener: ((Int) -> Unit)? = null
+        private var onDeleteListener: ((ProductoConCantidad) -> Unit)? = null
 
-        fun setOnDeleteListener(listener: (Int) -> Unit) {
+        fun setOnDeleteListener(listener: (ProductoConCantidad) -> Unit) {
             onDeleteListener = listener
         }
 
@@ -95,12 +130,16 @@ class ListaDetalleFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ProductoViewHolder, position: Int) {
-            val producto = getItem(position)
-            holder.nombre.text = producto.nombre
-            holder.precio.text = "\$${producto.precio}"
+            val item = getItem(position)
+            val producto = item.producto
+            val cantidad = item.cantidad
+            val totalPrecio = producto.precio * cantidad
+            
+            holder.nombre.text = "${producto.nombre} x${cantidad}"
+            holder.precio.text = "\$${totalPrecio}"
             holder.categoria.text = producto.categoria
             holder.btnEliminar.setOnClickListener {
-                onDeleteListener?.invoke(position)
+                onDeleteListener?.invoke(item)
             }
         }
     }
