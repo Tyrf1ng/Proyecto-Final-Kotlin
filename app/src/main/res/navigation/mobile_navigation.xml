@@ -24,6 +24,20 @@
             android:name="listaIndex"
             app:argType="integer"
             android:defaultValue="0" />
+        <action
+            android:id="@+id/action_lista_detalle_to_seleccionar_producto"
+            app:destination="@id/nav_seleccionar_producto" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_seleccionar_producto"
+        android:name="com.example.shoptimize.ui.detalle.SeleccionarProductoFragment"
+        android:label="Agregar Producto"
+        tools:layout="@layout/fragment_seleccionar_producto">
+        <argument
+            android:name="listaIndex"
+            app:argType="integer"
+            android:defaultValue="0" />
     </fragment>
 
     <fragment
