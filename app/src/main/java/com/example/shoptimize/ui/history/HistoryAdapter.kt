@@ -9,10 +9,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
-import com.example.shoptimize.data.ListaDeCompra
+import com.example.shoptimize.data.relations.ListaConProductos
 import com.example.shoptimize.databinding.ItemListaCompraBinding
 
-class HistoryAdapter : ListAdapter<ListaDeCompra, HistoryAdapter.HistoryViewHolder>(HistoryDiffCallback()) {
+class HistoryAdapter : ListAdapter<ListaConProductos, HistoryAdapter.HistoryViewHolder>(HistoryDiffCallback()) {
 
     private val drawables = listOf(
         R.drawable.avatar_1,
@@ -51,10 +51,10 @@ class HistoryAdapter : ListAdapter<ListaDeCompra, HistoryAdapter.HistoryViewHold
         private val textFecha: TextView = binding.textFecha
         private val textTotal: TextView = binding.textTotal
 
-        fun bind(purchase: ListaDeCompra, drawableRes: Int) {
-            textNombre.text = purchase.nombre
+        fun bind(purchase: ListaConProductos, drawableRes: Int) {
+            textNombre.text = purchase.lista.nombre
             textNombre.isSelected = true
-            textFecha.text = purchase.fecha
+            textFecha.text = purchase.lista.fecha
             textTotal.text = "$${purchase.calculateTotal()}"
             imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(imageView.resources, drawableRes, null)
@@ -62,13 +62,13 @@ class HistoryAdapter : ListAdapter<ListaDeCompra, HistoryAdapter.HistoryViewHold
         }
     }
 
-    private class HistoryDiffCallback : DiffUtil.ItemCallback<ListaDeCompra>() {
-        override fun areItemsTheSame(oldItem: ListaDeCompra, newItem: ListaDeCompra): Boolean {
-            return oldItem.nombre == newItem.nombre && oldItem.fecha == newItem.fecha
+    private class HistoryDiffCallback : DiffUtil.ItemCallback<ListaConProductos>() {
+        override fun areItemsTheSame(oldItem: ListaConProductos, newItem: ListaConProductos): Boolean {
+            return oldItem.lista.id == newItem.lista.id
         }
 
-        override fun areContentsTheSame(oldItem: ListaDeCompra, newItem: ListaDeCompra): Boolean {
-            return oldItem == newItem
+        override fun areContentsTheSame(oldItem: ListaConProductos, newItem: ListaConProductos): Boolean {
+            return oldItem.lista == newItem.lista && oldItem.productos == newItem.productos
         }
     }
 }
