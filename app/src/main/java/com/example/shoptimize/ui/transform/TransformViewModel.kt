@@ -1,95 +1,65 @@
 package com.example.shoptimize.ui.transform
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.shoptimize.data.ListaDeCompra
 import com.example.shoptimize.data.Producto
+import com.example.shoptimize.data.database.ShoptimizeDatabase
+import com.example.shoptimize.data.relations.ListaConProductos
+import com.example.shoptimize.data.repository.ListaDeCompraRepository
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class TransformViewModel : ViewModel() {
+class TransformViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _listas = MutableLiveData<MutableList<ListaDeCompra>>().apply {
-        value = mutableListOf<ListaDeCompra>().also { list ->
+    private val database = ShoptimizeDatabase.getInstance(application)
+    private val repository = ListaDeCompraRepository(
+        database.listaDeCompraDao(),
+        database.listaProductoCrossRefDao()
+    )
+
+    val listasConProductos: LiveData<List<ListaConProductos>> = 
+        repository.allListasConProductos.asLiveData()
+
+    fun addLista(nombre: String, usuarioId: Int? = null) {
+        viewModelScope.launch {
             val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            repeat(6) { i ->
-                val nuevaLista = ListaDeCompra(
-                    nombre = "Lista ${i + 1}",
-                    total = 0,
-                    fecha = fmt.format(Date())
-                )
-                
-                when (i) {
-                    0 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Pan", 3000, "Panadería"),
-                            Producto("Leche", 2500, "Lácteos")
-                        ))
-                    }
-                    1 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Arroz", 5000, "Granos"),
-                            Producto("Frijoles", 4500, "Granos"),
-                            Producto("Aceite", 6000, "Condimentos")
-                        ))
-                    }
-                    2 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Manzanas", 2000, "Frutas"),
-                            Producto("Naranjas", 1800, "Frutas")
-                        ))
-                    }
-                    3 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Pollo", 12000, "Carnes"),
-                            Producto("Carne molida", 14000, "Carnes")
-                        ))
-                    }
-                    4 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Lechuga", 3000, "Verduras"),
-                            Producto("Tomates", 2500, "Verduras"),
-                            Producto("Cebolla", 1500, "Verduras")
-                        ))
-                    }
-                    5 -> {
-                        nuevaLista.productos.addAll(listOf(
-                            Producto("Queso", 8000, "Lácteos"),
-                            Producto("Yogur", 3500, "Lácteos"),
-                            Producto("Mantequilla", 7000, "Lácteos")
-                        ))
-                    }
-                }
-                list.add(nuevaLista)
-            }
+            val nuevaLista = ListaDeCompra(
+                nombre = nombre,
+                fecha = fmt.format(Date()),
+                usuarioId = usuarioId
+            )
+            repository.insertLista(nuevaLista)
         }
     }
 
-    val listas: LiveData<MutableList<ListaDeCompra>> = _listas
-
-    fun addLista(nombre: String) {
-        val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val nueva = ListaDeCompra(nombre = nombre, fecha = fmt.format(Date()))
-        val current = _listas.value ?: mutableListOf()
-        current.add(0, nueva)
-        _listas.value = current
+    fun updateListaNombre(id: Int, nombre: String) {
+        viewModelScope.launch {
+            repository.updateListaNombre(id, nombre)
+        }
     }
 
-    fun updateListaProductos(index: Int, productos: List<com.example.shoptimize.data.Producto>) {
-        val current = _listas.value ?: return
-        if (index >= 0 && index < current.size) {
-            val listaActualizada = current[index].copy(
-                nombre = current[index].nombre,
-                total = 0,
-                fecha = current[index].fecha,
-                productos = productos.toMutableList()
-            )
-            current[index] = listaActualizada
-            val newList = mutableListOf<ListaDeCompra>()
-            newList.addAll(current)
-            _listas.value = newList
+    fun deleteLista(lista: ListaDeCompra) {
+        viewModelScope.launch {
+            repository.deleteLista(lista)
+        }
+    }
+
+    fun addProductoToLista(listaId: Int, productoId: Int, cantidad: Int = 1) {
+        viewModelScope.launch {
+            repository.addProductoToLista(listaId, productoId, cantidad)
+        }
+    }
+
+    fun removeProductoFromLista(listaId: Int, productoId: Int) {
+        viewModelScope.launch {
+            repository.removeProductoFromLista(listaId, productoId)
         }
     }
 }
