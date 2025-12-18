@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoptimize.R
 import com.example.shoptimize.databinding.HistoryListsBinding
@@ -60,6 +61,14 @@ class HistoryFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = HistoryAdapter()
         binding.purchaseList.adapter = adapter
+        
+        adapter.setItemClickListener { listaId ->
+            val bundle = Bundle().apply {
+                putInt("listaId", listaId)
+                putBoolean("readOnly", true)
+            }
+            findNavController().navigate(R.id.nav_lista_detalle, bundle)
+        }
 
         historyViewModel.filteredPurchases.observe(viewLifecycleOwner) { purchases ->
             adapter.submitList(purchases)

@@ -67,4 +67,7 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    
+    // Coil para cargar imágenes desde URLs
+    implementation("io.coil-kt:coil:2.5.0")
 }

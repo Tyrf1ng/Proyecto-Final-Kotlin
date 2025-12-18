@@ -32,4 +32,10 @@ class ReflowViewModel(application: Application) : AndroidViewModel(application) 
             repository.deleteProducto(producto)
         }
     }
+    
+    fun updateProducto(producto: Producto) {
+        viewModelScope.launch {
+            repository.updateProducto(producto)
+        }
+    }
 }

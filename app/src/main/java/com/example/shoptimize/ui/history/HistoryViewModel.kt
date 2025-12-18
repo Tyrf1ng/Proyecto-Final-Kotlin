@@ -20,8 +20,9 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         database.listaProductoCrossRefDao()
     )
 
+    // Obtener listas archivadas en lugar de todas las listas
     private val _allPurchases: LiveData<List<ListaConProductos>> = 
-        repository.allListasConProductos.asLiveData()
+        database.listaDeCompraDao().getListasArchivadas().asLiveData()
 
     private val _selectedMonth = MutableLiveData<Int>()
     private val _selectedYear = MutableLiveData<Int>()

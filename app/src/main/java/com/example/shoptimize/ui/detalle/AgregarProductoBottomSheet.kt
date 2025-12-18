@@ -15,6 +15,8 @@ import com.example.shoptimize.data.Producto
 import com.example.shoptimize.databinding.FragmentAgregarProductoBinding
 import com.example.shoptimize.databinding.ItemProductoSeleccionarBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import coil.load
+import com.google.android.material.imageview.ShapeableImageView
 
 class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
 
@@ -91,6 +93,13 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
             holder.precio.text = "\$${producto.precio}"
             holder.categoria.text = producto.categoria
             holder.producto = producto
+            
+            // Cargar imagen
+            holder.imagen.load(producto.imagenUrl) {
+                crossfade(true)
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_gallery)
+            }
         }
     }
 
@@ -102,6 +111,7 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
         val nombre: TextView = binding.textCatalogoNombre
         val precio: TextView = binding.textCatalogoPrecio
         val categoria: TextView = binding.textCatalogoCategoria
+        val imagen: ShapeableImageView = binding.imageItem
         private val btnAgregar = binding.btnAgregar
         var producto: Producto? = null
 

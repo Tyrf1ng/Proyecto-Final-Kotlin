@@ -137,12 +137,26 @@ class TransformFragment : Fragment() {
     }
 
     private fun showCreateDialog(onCreate: (String) -> Unit) {
-        val edit = EditText(requireContext())
+        val layout = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 10)
+        }
+        
+        val textInputLayout = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "Nombre de la lista"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        
+        val editText = com.google.android.material.textfield.TextInputEditText(textInputLayout.context)
+        
+        textInputLayout.addView(editText)
+        layout.addView(textInputLayout)
+        
         AlertDialog.Builder(requireContext())
             .setTitle("Nueva lista")
-            .setView(edit)
+            .setView(layout)
             .setPositiveButton("Crear") { _, _ ->
-                val name = edit.text.toString().ifBlank { "Nueva lista" }
+                val name = editText.text.toString().ifBlank { "Nueva lista" }
                 onCreate(name)
             }
             .setNegativeButton("Cancelar", null)
@@ -154,8 +168,10 @@ class TransformFragment : Fragment() {
             .setTitle("Eliminar lista")
             .setMessage("¿Estás seguro de que deseas eliminar la lista \"${listaConProductos.lista.nombre}\"?")
             .setPositiveButton("Eliminar") { _, _ ->
+                // Guardar en historial antes de eliminar
+                transformViewModel.guardarEnHistorial(listaConProductos)
                 transformViewModel.deleteLista(listaConProductos.lista)
-                Toast.makeText(requireContext(), "Lista eliminada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Lista eliminada y archivada en historial", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
             .show()

@@ -9,7 +9,8 @@ data class Producto(
     val id: Int = 0,
     val nombre: String,
     var precio: Int,
-    val categoria: String
+    val categoria: String,
+    val imagenUrl: String? = null
 ) {
     fun setearPrecio(nuevoPrecio: Int) {
         precio = nuevoPrecio

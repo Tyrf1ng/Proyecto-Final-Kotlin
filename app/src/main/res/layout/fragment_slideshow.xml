@@ -20,89 +20,116 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_profile_image"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
                 android:contentDescription="@string/profile_image"
                 android:src="@drawable/avatar_1"
-                android:scaleType="centerInside"
-                android:elevation="4dp" />
+                android:scaleType="centerCrop"
+                android:elevation="4dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.Circle"
+                app:strokeWidth="4dp"
+                app:strokeColor="?attr/colorPrimary" />
 
-            <TextView
-                android:id="@+id/tv_profile_name"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/profile_name_label"
-                android:textSize="14sp"
-                android:textColor="@color/purple_700"
-                android:textStyle="bold" />
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.Shoptimize.CardView">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_profile_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:boxBackgroundMode="outline"
-                app:boxStrokeColor="@color/purple_700">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tiet_profile_name"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_name"
-                    android:inputType="text"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <LinearLayout
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Información Personal"
+                        android:textAppearance="@style/TextAppearance.Shoptimize.Headline3"
+                        android:layout_marginBottom="16dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_profile_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/profile_name_label"
+                        style="@style/Widget.Shoptimize.TextInputLayout">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tiet_profile_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="32dp">
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.Shoptimize.CardView">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_change_avatar"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/change_avatar"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_save_profile"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/save_profile"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Acciones"
+                        android:textAppearance="@style/TextAppearance.Shoptimize.Headline3"
+                        android:layout_marginBottom="16dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_change_avatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/change_avatar"
+                        app:icon="@android:drawable/ic_menu_gallery"
+                        app:iconGravity="start"
+                        style="@style/Widget.Shoptimize.Button.Outlined" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_save_profile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/save_profile"
+                        app:icon="@android:drawable/ic_menu_save"
+                        app:iconGravity="start"
+                        style="@style/Widget.Shoptimize.Button" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_toggle_theme"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Modo oscuro"
+                        app:icon="@android:drawable/ic_menu_view"
+                        app:iconGravity="start"
+                        style="@style/Widget.Shoptimize.Button.Outlined" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/tv_profile_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/profile_info"
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray"
+                android:textAppearance="@style/TextAppearance.Shoptimize.Caption"
                 android:textAlignment="center" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_toggle_theme"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Modo oscuro"
-                style="@style/Widget.MaterialComponents.Button" />
 
         </LinearLayout>
     </ScrollView>

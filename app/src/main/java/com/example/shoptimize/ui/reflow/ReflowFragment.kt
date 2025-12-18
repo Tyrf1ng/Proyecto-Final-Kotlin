@@ -2,10 +2,11 @@ package com.example.shoptimize.ui.reflow
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +20,8 @@ import com.example.shoptimize.data.Producto
 import com.example.shoptimize.data.database.ShoptimizeDatabase
 import com.example.shoptimize.databinding.FragmentReflowBinding
 import kotlinx.coroutines.launch
+import coil.load
+import com.google.android.material.imageview.ShapeableImageView
 
 class ReflowFragment : Fragment() {
 
@@ -37,12 +40,8 @@ class ReflowFragment : Fragment() {
         val reflowViewModel = ViewModelProvider(this).get(ReflowViewModel::class.java)
         val adapter = CatalogoAdapter(
             onProductoClick = { producto ->
-                // Click en el producto para ver detalles
-                android.widget.Toast.makeText(
-                    requireContext(),
-                    producto.nombre,
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
+                // Click en el producto para editar
+                mostrarDialogoEditarProducto(producto, reflowViewModel)
             },
             onEliminarClick = { producto ->
                 // Confirmar eliminación
@@ -56,21 +55,22 @@ class ReflowFragment : Fragment() {
         reflowViewModel.allProductos.observe(viewLifecycleOwner) { productos ->
             adapter.submitList(productos)
             
-            binding.searchProductos.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = false
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    val filtered = if (newText.isNullOrBlank()) {
+            binding.searchProductos.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    val filtered = if (s.isNullOrBlank()) {
                         productos
                     } else {
                         productos.filter {
-                            it.nombre.contains(newText, ignoreCase = true) ||
-                            it.categoria.contains(newText, ignoreCase = true)
+                            it.nombre.contains(s, ignoreCase = true) ||
+                            it.categoria.contains(s, ignoreCase = true)
                         }
                     }
                     adapter.submitList(filtered)
-                    return true
                 }
+                
+                override fun afterTextChanged(s: Editable?) {}
             })
         }
 
@@ -92,22 +92,58 @@ class ReflowFragment : Fragment() {
             setPadding(50, 40, 50, 10)
         }
         
-        val inputNombre = android.widget.EditText(requireContext()).apply {
+        // Campo nombre con TextInputLayout
+        val tilNombre = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
             hint = "Nombre del producto"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
         }
+        val inputNombre = com.google.android.material.textfield.TextInputEditText(tilNombre.context)
+        tilNombre.addView(inputNombre)
         
-        val inputPrecio = android.widget.EditText(requireContext()).apply {
+        // Campo precio con TextInputLayout
+        val tilPrecio = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
             hint = "Precio"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        val inputPrecio = com.google.android.material.textfield.TextInputEditText(tilPrecio.context).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
+        tilPrecio.addView(inputPrecio)
         
-        val inputCategoria = android.widget.EditText(requireContext()).apply {
+        // Campo categoría con TextInputLayout
+        val tilCategoria = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
             hint = "Categoría"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
         }
+        val inputCategoria = com.google.android.material.textfield.TextInputEditText(tilCategoria.context)
+        tilCategoria.addView(inputCategoria)
         
-        layout.addView(inputNombre)
-        layout.addView(inputPrecio)
-        layout.addView(inputCategoria)
+        // Campo URL con TextInputLayout
+        val tilImagenUrl = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "URL de la imagen (opcional)"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        val inputImagenUrl = com.google.android.material.textfield.TextInputEditText(tilImagenUrl.context).apply {
+            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
+        }
+        tilImagenUrl.addView(inputImagenUrl)
+        
+        layout.addView(tilNombre)
+        layout.addView(tilPrecio)
+        layout.addView(tilCategoria)
+        layout.addView(tilImagenUrl)
         
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Agregar Producto al Catálogo")
@@ -134,7 +170,8 @@ class ReflowFragment : Fragment() {
                         val nuevoProducto = Producto(
                             nombre = nombre,
                             precio = precio,
-                            categoria = categoria.ifBlank { "General" }
+                            categoria = categoria.ifBlank { "General" },
+                            imagenUrl = inputImagenUrl.text.toString().takeIf { it.isNotBlank() }
                         )
                         
                         reflowViewModel.addProducto(nuevoProducto)
@@ -146,6 +183,109 @@ class ReflowFragment : Fragment() {
                         ).show()
                     }
                 }
+            } else {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "El nombre no puede estar vacío",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        builder.setNegativeButton("Cancelar", null)
+        builder.show()
+    }
+    
+    private fun mostrarDialogoEditarProducto(producto: Producto, reflowViewModel: ReflowViewModel) {
+        // Crear un layout vertical con campos de entrada
+        val layout = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 10)
+        }
+        
+        // Campo nombre con TextInputLayout
+        val tilNombre = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "Nombre del producto"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        val inputNombre = com.google.android.material.textfield.TextInputEditText(tilNombre.context).apply {
+            setText(producto.nombre)
+        }
+        tilNombre.addView(inputNombre)
+        
+        // Campo precio con TextInputLayout
+        val tilPrecio = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "Precio"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        val inputPrecio = com.google.android.material.textfield.TextInputEditText(tilPrecio.context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(producto.precio.toString())
+        }
+        tilPrecio.addView(inputPrecio)
+        
+        // Campo categoría con TextInputLayout
+        val tilCategoria = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "Categoría"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        val inputCategoria = com.google.android.material.textfield.TextInputEditText(tilCategoria.context).apply {
+            setText(producto.categoria)
+        }
+        tilCategoria.addView(inputCategoria)
+        
+        // Campo URL con TextInputLayout
+        val tilImagenUrl = com.google.android.material.textfield.TextInputLayout(requireContext()).apply {
+            hint = "URL de la imagen (opcional)"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        val inputImagenUrl = com.google.android.material.textfield.TextInputEditText(tilImagenUrl.context).apply {
+            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
+            setText(producto.imagenUrl ?: "")
+        }
+        tilImagenUrl.addView(inputImagenUrl)
+        
+        layout.addView(tilNombre)
+        layout.addView(tilPrecio)
+        layout.addView(tilCategoria)
+        layout.addView(tilImagenUrl)
+        
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Editar Producto")
+        builder.setView(layout)
+        
+        builder.setPositiveButton("Guardar") { _, _ ->
+            val nombre = inputNombre.text.toString()
+            val precio = inputPrecio.text.toString().toIntOrNull() ?: producto.precio
+            val categoria = inputCategoria.text.toString()
+            val imagenUrl = inputImagenUrl.text.toString().takeIf { it.isNotBlank() }
+            
+            if (nombre.isNotBlank()) {
+                val productoActualizado = producto.copy(
+                    nombre = nombre,
+                    precio = precio,
+                    categoria = categoria.ifBlank { "General" },
+                    imagenUrl = imagenUrl
+                )
+                
+                reflowViewModel.updateProducto(productoActualizado)
+                
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Producto actualizado",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
             } else {
                 android.widget.Toast.makeText(
                     requireContext(),
@@ -213,11 +353,19 @@ class ReflowFragment : Fragment() {
         private val precio: TextView = itemView.findViewById(R.id.text_catalogo_precio)
         private val categoria: TextView = itemView.findViewById(R.id.text_catalogo_categoria)
         private val btnEliminar = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_eliminar)
+        private val imagen: ShapeableImageView = itemView.findViewById(R.id.image_catalogo)
 
         fun bind(producto: Producto) {
             nombre.text = producto.nombre
             precio.text = "\$${producto.precio}"
             categoria.text = producto.categoria
+            
+            // Cargar imagen desde URL con Coil
+            imagen.load(producto.imagenUrl) {
+                crossfade(true)
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_gallery)
+            }
             itemView.setOnClickListener {
                 onProductoClick(producto)
             }
