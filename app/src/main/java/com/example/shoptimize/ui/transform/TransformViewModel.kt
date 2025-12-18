@@ -50,6 +50,29 @@ class TransformViewModel(application: Application) : AndroidViewModel(applicatio
             repository.deleteLista(lista)
         }
     }
+    
+    fun guardarEnHistorial(listaConProductos: ListaConProductos) {
+        viewModelScope.launch {
+            // Crear una copia archivada de la lista
+            val listaArchivada = ListaDeCompra(
+                nombre = "${listaConProductos.lista.nombre} (Completada)",
+                fecha = listaConProductos.lista.fecha,
+                total = listaConProductos.calculateTotal(),
+                esArchivada = true
+            )
+            val nuevaListaId = repository.insertLista(listaArchivada).toInt()
+            
+            // Copiar los productos con sus cantidades
+            val crossRefs = repository.getProductosCrossRef(listaConProductos.lista.id)
+            crossRefs.forEach { crossRef ->
+                repository.addProductoToLista(
+                    listaId = nuevaListaId,
+                    productoId = crossRef.productoId,
+                    cantidad = crossRef.cantidad
+                )
+            }
+        }
+    }
 
     fun addProductoToLista(listaId: Int, productoId: Int, cantidad: Int = 1) {
         viewModelScope.launch {
