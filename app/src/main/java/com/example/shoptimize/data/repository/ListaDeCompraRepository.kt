@@ -104,6 +104,10 @@ class ListaDeCompraRepository(
         updateTotalLista(listaId)
     }
     
+    suspend fun getProductosCrossRef(listaId: Int): List<ListaProductoCrossRef> {
+        return listaProductoCrossRefDao.getCrossRefsByLista(listaId)
+    }
+    
     private suspend fun updateTotalLista(listaId: Int) {
         val listaConProductos = listaDeCompraDao.getListaConProductos(listaId)
         if (listaConProductos != null) {
