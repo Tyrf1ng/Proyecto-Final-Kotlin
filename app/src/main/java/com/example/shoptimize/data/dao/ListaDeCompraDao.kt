@@ -33,12 +33,21 @@ interface ListaDeCompraDao {
     suspend fun getListaConProductos(id: Int): ListaConProductos?
     
     @Transaction
-    @Query("SELECT * FROM listas_de_compra ORDER BY fecha DESC")
+    @Query("SELECT * FROM listas_de_compra WHERE esArchivada = 0 ORDER BY fecha DESC")
     fun getAllListasConProductos(): Flow<List<ListaConProductos>>
     
     @Transaction
     @Query("SELECT * FROM listas_de_compra WHERE usuarioId = :usuarioId ORDER BY fecha DESC")
     fun getListasConProductosByUsuario(usuarioId: Int): Flow<List<ListaConProductos>>
+    
+    // Obtener listas archivadas (historial)
+    @Transaction
+    @Query("SELECT * FROM listas_de_compra WHERE esArchivada = 1 ORDER BY fecha DESC")
+    fun getListasArchivadas(): Flow<List<ListaConProductos>>
+    
+    @Transaction
+    @Query("SELECT * FROM listas_de_compra WHERE esArchivada = 1 AND fecha LIKE :mesAno || '%' ORDER BY fecha DESC")
+    fun getListasArchivadasByMesAno(mesAno: String): Flow<List<ListaConProductos>>
     
     // Insertar lista
     @Insert(onConflict = OnConflictStrategy.REPLACE)

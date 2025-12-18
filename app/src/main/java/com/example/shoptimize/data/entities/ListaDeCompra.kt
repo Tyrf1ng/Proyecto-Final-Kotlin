@@ -15,7 +15,8 @@ data class ListaDeCompra(
     val nombre: String,
     var total: Int = 0,
     val fecha: String,
-    val usuarioId: Int? = null
+    val usuarioId: Int? = null,
+    val esArchivada: Boolean = false
 ) {
     fun createProduct(): Producto {
         return Producto(nombre = "", precio = 0, categoria = "")
