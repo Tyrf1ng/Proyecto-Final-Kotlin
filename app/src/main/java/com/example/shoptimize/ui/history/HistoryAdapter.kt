@@ -1,6 +1,7 @@
 package com.example.shoptimize.ui.history
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,6 +29,12 @@ class HistoryAdapter : ListAdapter<ListaConProductos, HistoryAdapter.HistoryView
         R.drawable.avatar_11,
         R.drawable.avatar_12
     )
+    
+    private var onItemClickListener: ((Int) -> Unit)? = null
+    
+    fun setItemClickListener(listener: (Int) -> Unit) {
+        onItemClickListener = listener
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
         val binding = ItemListaCompraBinding.inflate(
@@ -41,6 +48,9 @@ class HistoryAdapter : ListAdapter<ListaConProductos, HistoryAdapter.HistoryView
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val purchase = getItem(position)
         holder.bind(purchase, drawables[position % drawables.size])
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.invoke(purchase.lista.id)
+        }
     }
 
     class HistoryViewHolder(private val binding: ItemListaCompraBinding) :
@@ -59,6 +69,8 @@ class HistoryAdapter : ListAdapter<ListaConProductos, HistoryAdapter.HistoryView
             imageView.setImageDrawable(
                 ResourcesCompat.getDrawable(imageView.resources, drawableRes, null)
             )
+            // Ocultar botón de eliminar en historial
+            binding.btnDeleteLista.visibility = View.GONE
         }
     }
 
