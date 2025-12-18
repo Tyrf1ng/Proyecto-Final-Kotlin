@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.reflow.ReflowFragment">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_total"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        app:cardCornerRadius="8dp"
+        style="@style/Widget.Shoptimize.CardView.Elevated"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -27,21 +27,19 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Total:"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/TextAppearance.Shoptimize.Headline3" />
 
             <TextView
                 android:id="@+id/text_total_lista"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="$0"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/holo_green_dark" />
+                android:textAppearance="@style/TextAppearance.Shoptimize.Price"
+                android:textColor="@color/success" />
 
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_productos"
@@ -64,26 +62,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/icon_empty"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:contentDescription="Bolsa vacía"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_shopping_bag" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛒"
+            android:textSize="64sp"
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:id="@+id/text_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Comienza a agregar productos"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+            android:text="Lista vacía"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Headline3"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agrega productos para comenzar"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Body2" />
 
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_producto"
+        style="@style/Widget.Shoptimize.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Agregar producto"

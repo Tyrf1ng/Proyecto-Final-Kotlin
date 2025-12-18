@@ -20,6 +20,8 @@ import com.example.shoptimize.data.repository.ListaDeCompraRepository
 import com.example.shoptimize.databinding.FragmentListaDetalleBinding
 import com.example.shoptimize.databinding.ItemProductoBinding
 import kotlinx.coroutines.launch
+import coil.load
+import com.google.android.material.imageview.ShapeableImageView
 
 data class ProductoConCantidad(
     val producto: Producto,
@@ -31,6 +33,7 @@ class ListaDetalleFragment : Fragment() {
     private var _binding: FragmentListaDetalleBinding? = null
     private val binding get() = _binding!!
     private var listaId: Int = 0
+    private var readOnly: Boolean = false
     private lateinit var repository: ListaDeCompraRepository
     private lateinit var database: ShoptimizeDatabase
     private lateinit var adapter: ProductoAdapter
@@ -44,6 +47,7 @@ class ListaDetalleFragment : Fragment() {
         val root: View = binding.root
 
         listaId = arguments?.getInt("listaId") ?: 0
+        readOnly = arguments?.getBoolean("readOnly", false) ?: false
         
         database = ShoptimizeDatabase.getInstance(requireContext())
         repository = ListaDeCompraRepository(
@@ -54,23 +58,29 @@ class ListaDetalleFragment : Fragment() {
         adapter = ProductoAdapter()
         binding.recyclerviewProductos.adapter = adapter
 
-        adapter.setOnDeleteListener { productoConCantidad ->
-            lifecycleScope.launch {
-                repository.removeProductoFromLista(listaId, productoConCantidad.producto.id)
-                cargarProductos()
+        // Configurar según si es solo lectura (historial) o editable
+        if (readOnly) {
+            binding.fabAddProducto.visibility = View.GONE
+            adapter.setReadOnly(true)
+        } else {
+            adapter.setOnDeleteListener { productoConCantidad ->
+                lifecycleScope.launch {
+                    repository.removeProductoFromLista(listaId, productoConCantidad.producto.id)
+                    cargarProductos()
+                }
+            }
+            
+            binding.fabAddProducto.setOnClickListener {
+                val bundle = Bundle().apply {
+                    putInt("listaId", listaId)
+                }
+                findNavController().navigate(R.id.action_lista_detalle_to_seleccionar_producto, bundle)
             }
         }
 
         // Cargar productos inicialmente
         lifecycleScope.launch {
             cargarProductos()
-        }
-
-        binding.fabAddProducto.setOnClickListener {
-            val bundle = Bundle().apply {
-                putInt("listaId", listaId)
-            }
-            findNavController().navigate(R.id.action_lista_detalle_to_seleccionar_producto, bundle)
         }
 
         return root
@@ -98,8 +108,8 @@ class ListaDetalleFragment : Fragment() {
             // Calcular total sumando precio × cantidad
             val total = productosConCantidad.sumOf { it.producto.precio * it.cantidad }
             binding.textTotalLista.text = "\$$total"
-                // Sincronizar total calculado en la base de datos para mantener la tarjeta en lista de compras coherente
-                database.listaDeCompraDao().updateListaTotal(listaId, total)
+            // Sincronizar total calculado en la base de datos para mantener la tarjeta en lista de compras coherente
+            database.listaDeCompraDao().updateListaTotal(listaId, total)
         }
     }
 
@@ -119,9 +129,14 @@ class ListaDetalleFragment : Fragment() {
         }) {
 
         private var onDeleteListener: ((ProductoConCantidad) -> Unit)? = null
+        private var isReadOnly: Boolean = false
 
         fun setOnDeleteListener(listener: (ProductoConCantidad) -> Unit) {
             onDeleteListener = listener
+        }
+        
+        fun setReadOnly(readOnly: Boolean) {
+            isReadOnly = readOnly
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoViewHolder {
@@ -138,8 +153,22 @@ class ListaDetalleFragment : Fragment() {
             holder.nombre.text = "${producto.nombre} x${cantidad}"
             holder.precio.text = "\$${totalPrecio}"
             holder.categoria.text = producto.categoria
-            holder.btnEliminar.setOnClickListener {
-                onDeleteListener?.invoke(item)
+            
+            // Cargar imagen desde URL
+            holder.imagen.load(producto.imagenUrl) {
+                crossfade(true)
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_gallery)
+            }
+            
+            // Ocultar botón eliminar si es solo lectura
+            if (isReadOnly) {
+                holder.btnEliminar.visibility = View.GONE
+            } else {
+                holder.btnEliminar.visibility = View.VISIBLE
+                holder.btnEliminar.setOnClickListener {
+                    onDeleteListener?.invoke(item)
+                }
             }
         }
     }
@@ -151,5 +180,6 @@ class ListaDetalleFragment : Fragment() {
         val precio: TextView = binding.textProductoPrecio
         val categoria: TextView = binding.textProductoCategoria
         val btnEliminar: ImageView = binding.btnEliminar
+        val imagen: ShapeableImageView = binding.imageProducto
     }
 }

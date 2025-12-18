@@ -5,13 +5,26 @@
     android:layout_height="wrap_content"
     android:padding="12dp">
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_producto"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_menu_gallery"
+        android:contentDescription="Imagen del producto"
+        android:scaleType="centerCrop"
+        android:background="@color/surface_variant_light"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.MediumComponent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <TextView
         android:id="@+id/text_producto_nombre"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textAppearance="@style/TextAppearance.Shoptimize.Body1"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toEndOf="@id/image_producto"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/text_producto_precio"
         android:layout_marginEnd="8dp"
@@ -22,7 +35,7 @@
         android:id="@+id/text_producto_precio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:textAppearance="@style/TextAppearance.Shoptimize.Body2"
         app:layout_constraintEnd_toStartOf="@id/btn_eliminar"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginEnd="12dp" />
@@ -41,9 +54,9 @@
         android:id="@+id/text_producto_categoria"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="@android:color/darker_gray"
-        app:layout_constraintStart_toStartOf="@id/text_producto_nombre"
+        android:textAppearance="@style/TextAppearance.Shoptimize.Caption"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toEndOf="@id/image_producto"
         app:layout_constraintTop_toBottomOf="@id/text_producto_nombre"
         app:layout_constraintEnd_toEndOf="@id/text_producto_nombre"
         android:layout_marginTop="4dp" />
