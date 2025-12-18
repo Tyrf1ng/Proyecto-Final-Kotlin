@@ -3,11 +3,9 @@ package com.example.shoptimize.ui.transform
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.shoptimize.data.ListaDeCompra
-import com.example.shoptimize.data.Producto
 import com.example.shoptimize.data.database.ShoptimizeDatabase
 import com.example.shoptimize.data.relations.ListaConProductos
 import com.example.shoptimize.data.repository.ListaDeCompraRepository
@@ -48,29 +46,6 @@ class TransformViewModel(application: Application) : AndroidViewModel(applicatio
     fun deleteLista(lista: ListaDeCompra) {
         viewModelScope.launch {
             repository.deleteLista(lista)
-        }
-    }
-    
-    fun guardarEnHistorial(listaConProductos: ListaConProductos) {
-        viewModelScope.launch {
-            // Crear una copia archivada de la lista
-            val listaArchivada = ListaDeCompra(
-                nombre = "${listaConProductos.lista.nombre} (Completada)",
-                fecha = listaConProductos.lista.fecha,
-                total = listaConProductos.calculateTotal(),
-                esArchivada = true
-            )
-            val nuevaListaId = repository.insertLista(listaArchivada).toInt()
-            
-            // Copiar los productos con sus cantidades
-            val crossRefs = repository.getProductosCrossRef(listaConProductos.lista.id)
-            crossRefs.forEach { crossRef ->
-                repository.addProductoToLista(
-                    listaId = nuevaListaId,
-                    productoId = crossRef.productoId,
-                    cantidad = crossRef.cantidad
-                )
-            }
         }
     }
 

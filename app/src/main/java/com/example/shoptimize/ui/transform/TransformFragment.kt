@@ -168,10 +168,8 @@ class TransformFragment : Fragment() {
             .setTitle("Eliminar lista")
             .setMessage("¿Estás seguro de que deseas eliminar la lista \"${listaConProductos.lista.nombre}\"?")
             .setPositiveButton("Eliminar") { _, _ ->
-                // Guardar en historial antes de eliminar
-                transformViewModel.guardarEnHistorial(listaConProductos)
                 transformViewModel.deleteLista(listaConProductos.lista)
-                Toast.makeText(requireContext(), "Lista eliminada y archivada en historial", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Lista eliminada", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
             .show()

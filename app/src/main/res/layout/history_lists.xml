@@ -8,16 +8,6 @@
     android:padding="16dp"
     tools:context=".ui.history.HistoryFragment">
 
-    <!-- Título -->
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_historial"
-        android:textAppearance="@style/TextAppearance.Shoptimize.Headline2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Dropdown Mes -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/monthDropdownLayout"
@@ -26,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/yearDropdownLayout"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -48,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginStart="8dp"
-        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/monthDropdownLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="1">
