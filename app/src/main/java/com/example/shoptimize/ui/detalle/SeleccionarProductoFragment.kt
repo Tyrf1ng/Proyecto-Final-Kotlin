@@ -18,6 +18,8 @@ import com.example.shoptimize.data.database.ShoptimizeDatabase
 import com.example.shoptimize.data.repository.ListaDeCompraRepository
 import com.example.shoptimize.databinding.FragmentSeleccionarProductoBinding
 import com.example.shoptimize.databinding.ItemProductoSeleccionarBinding
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -49,8 +51,8 @@ class SeleccionarProductoFragment : Fragment() {
             database.listaProductoCrossRefDao()
         )
 
-        val adapter = SeleccionarProductoAdapter { producto ->
-            agregarProductoALista(producto)
+        val adapter = SeleccionarProductoAdapter { producto, cantidad ->
+            agregarProductoALista(producto, cantidad)
         }
         binding.recyclerviewCatalogoSeleccionar.adapter = adapter
 
@@ -78,31 +80,16 @@ class SeleccionarProductoFragment : Fragment() {
         })
     }
 
-    private fun agregarProductoALista(producto: Producto) {
-        val inputCantidad = android.widget.EditText(requireContext()).apply {
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            setText("1")
-            hint = "Cantidad"
+    private fun agregarProductoALista(producto: Producto, cantidad: Int) {
+        lifecycleScope.launch {
+            repository.addProductoToLista(listaId, producto.id, cantidad)
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Agregado: ${producto.nombre} x$cantidad",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+            findNavController().popBackStack()
         }
-        
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Agregar ${producto.nombre}")
-            .setMessage("Precio: \$${producto.precio}")
-            .setView(inputCantidad)
-            .setPositiveButton("Agregar") { _, _ ->
-                val cantidad = inputCantidad.text.toString().toIntOrNull() ?: 1
-                lifecycleScope.launch {
-                    repository.addProductoToLista(listaId, producto.id, cantidad)
-                    android.widget.Toast.makeText(
-                        requireContext(),
-                        "Agregado: ${producto.nombre} x$cantidad",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                    findNavController().popBackStack()
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 
     override fun onDestroyView() {
@@ -110,7 +97,7 @@ class SeleccionarProductoFragment : Fragment() {
         _binding = null
     }
 
-    class SeleccionarProductoAdapter(private val onProductoClick: (Producto) -> Unit) :
+    class SeleccionarProductoAdapter(private val onProductoClick: (Producto, Int) -> Unit) :
         ListAdapter<Producto, SeleccionarProductoViewHolder>(object : DiffUtil.ItemCallback<Producto>() {
 
             override fun areItemsTheSame(oldItem: Producto, newItem: Producto): Boolean =
@@ -133,21 +120,43 @@ class SeleccionarProductoFragment : Fragment() {
 
     class SeleccionarProductoViewHolder(
         binding: ItemProductoSeleccionarBinding,
-        private val onProductoClick: (Producto) -> Unit
+        private val onProductoClick: (Producto, Int) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private val nombre: TextView = binding.textCatalogoNombre
         private val precio: TextView = binding.textCatalogoPrecio
         private val categoria: TextView = binding.textCatalogoCategoria
-        private val btnAgregar = binding.btnAgregar
+        
+        private val btnDecrease: MaterialButton = binding.btnDecrease
+        private val btnIncrease: MaterialButton = binding.btnIncrease
+        private val editTextQuantity: TextInputEditText = binding.editTextQuantity
+        private val btnAgregarConCantidad: MaterialButton = binding.btnAgregarConCantidad
 
         fun bind(producto: Producto) {
             nombre.text = producto.nombre
             precio.text = "\$${producto.precio}"
             categoria.text = producto.categoria
-            btnAgregar.setOnClickListener {
-                onProductoClick(producto)
+            editTextQuantity.setText("1")
+
+            btnDecrease.setOnClickListener {
+                updateQuantity(-1)
             }
+            btnIncrease.setOnClickListener {
+                updateQuantity(1)
+            }
+            btnAgregarConCantidad.setOnClickListener {
+                val quantity = editTextQuantity.text.toString().toIntOrNull() ?: 1
+                onProductoClick(producto, quantity)
+            }
+        }
+        
+        private fun updateQuantity(change: Int) {
+            var quantity = editTextQuantity.text.toString().toIntOrNull() ?: 1
+            quantity += change
+            if (quantity < 1) {
+                quantity = 1
+            }
+            editTextQuantity.setText(quantity.toString())
         }
     }
 }

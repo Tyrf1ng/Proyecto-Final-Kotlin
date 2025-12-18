@@ -16,15 +16,17 @@ import com.example.shoptimize.databinding.FragmentAgregarProductoBinding
 import com.example.shoptimize.databinding.ItemProductoSeleccionarBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import coil.load
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.textfield.TextInputEditText
 
 class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: FragmentAgregarProductoBinding? = null
     private val binding get() = _binding!!
-    private var onProductoSeleccionado: ((Producto) -> Unit)? = null
+    private var onProductoSeleccionado: ((Producto, Int) -> Unit)? = null
 
-    fun setOnProductoSeleccionado(callback: (Producto) -> Unit) {
+    fun setOnProductoSeleccionado(callback: (Producto, Int) -> Unit) {
         onProductoSeleccionado = callback
     }
 
@@ -40,8 +42,8 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = ProductoSheetAdapter { producto ->
-            onProductoSeleccionado?.invoke(producto)
+        val adapter = ProductoSheetAdapter { producto, cantidad ->
+            onProductoSeleccionado?.invoke(producto, cantidad)
             dismiss()
         }
         binding.recyclerviewProductosSheet.adapter = adapter
@@ -58,7 +60,7 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
                 } else {
                     productos.filter {
                         it.nombre.contains(newText, ignoreCase = true) ||
-                        it.categoria.contains(newText, ignoreCase = true)
+                                it.categoria.contains(newText, ignoreCase = true)
                     }
                 }
                 adapter.submitList(filtered)
@@ -72,7 +74,7 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
         _binding = null
     }
 
-    class ProductoSheetAdapter(private val onItemClick: (Producto) -> Unit) :
+    class ProductoSheetAdapter(private val onItemClick: (Producto, Int) -> Unit) :
         ListAdapter<Producto, ProductoSheetViewHolder>(object : DiffUtil.ItemCallback<Producto>() {
 
             override fun areItemsTheSame(oldItem: Producto, newItem: Producto): Boolean =
@@ -89,36 +91,61 @@ class AgregarProductoBottomSheet : BottomSheetDialogFragment() {
 
         override fun onBindViewHolder(holder: ProductoSheetViewHolder, position: Int) {
             val producto = getItem(position)
-            holder.nombre.text = producto.nombre
-            holder.precio.text = "\$${producto.precio}"
-            holder.categoria.text = producto.categoria
-            holder.producto = producto
-            
-            // Cargar imagen
-            holder.imagen.load(producto.imagenUrl) {
-                crossfade(true)
-                placeholder(android.R.drawable.ic_menu_gallery)
-                error(android.R.drawable.ic_menu_gallery)
-            }
+            holder.bind(producto)
         }
     }
 
     class ProductoSheetViewHolder(
         binding: ItemProductoSeleccionarBinding,
-        private val onItemClick: (Producto) -> Unit
+        private val onItemClick: (Producto, Int) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        val nombre: TextView = binding.textCatalogoNombre
-        val precio: TextView = binding.textCatalogoPrecio
-        val categoria: TextView = binding.textCatalogoCategoria
-        val imagen: ShapeableImageView = binding.imageItem
-        private val btnAgregar = binding.btnAgregar
-        var producto: Producto? = null
+        private val nombre: TextView = binding.textCatalogoNombre
+        private val precio: TextView = binding.textCatalogoPrecio
+        private val categoria: TextView = binding.textCatalogoCategoria
+        private val imagen: ShapeableImageView = binding.imageItem
+        private val btnDecrease: MaterialButton = binding.btnDecrease
+        private val btnIncrease: MaterialButton = binding.btnIncrease
+        private val editTextQuantity: TextInputEditText = binding.editTextQuantity
+        private val btnAgregar: MaterialButton = binding.btnAgregarConCantidad
+        private var producto: Producto? = null
 
         init {
-            btnAgregar.setOnClickListener {
-                producto?.let { onItemClick(it) }
+            btnDecrease.setOnClickListener {
+                updateQuantity(-1)
             }
+            btnIncrease.setOnClickListener {
+                updateQuantity(1)
+            }
+            btnAgregar.setOnClickListener {
+                producto?.let {
+                    val quantity = editTextQuantity.text.toString().toIntOrNull() ?: 1
+                    onItemClick(it, quantity)
+                }
+            }
+        }
+
+        fun bind(producto: Producto) {
+            this.producto = producto
+            nombre.text = producto.nombre
+            precio.text = "$${producto.precio}"
+            categoria.text = producto.categoria
+            editTextQuantity.setText("1")
+
+            imagen.load(producto.imagenUrl) {
+                crossfade(true)
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_gallery)
+            }
+        }
+
+        private fun updateQuantity(change: Int) {
+            var quantity = editTextQuantity.text.toString().toIntOrNull() ?: 1
+            quantity += change
+            if (quantity < 1) {
+                quantity = 1
+            }
+            editTextQuantity.setText(quantity.toString())
         }
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -35,7 +36,8 @@
             android:layout_marginTop="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/image_item" />
+            app:layout_constraintTop_toBottomOf="@id/image_item"
+            tools:text="Nombre del Producto" />
 
         <TextView
             android:id="@+id/text_catalogo_precio"
@@ -46,7 +48,8 @@
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_catalogo_nombre" />
+            app:layout_constraintTop_toBottomOf="@id/text_catalogo_nombre"
+            tools:text="$10.00" />
 
         <TextView
             android:id="@+id/text_catalogo_categoria"
@@ -57,10 +60,78 @@
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_catalogo_precio" />
+            app:layout_constraintTop_toBottomOf="@id/text_catalogo_precio"
+            tools:text="Categoría" />
+
+        <!-- Quantity Selector -->
+        <LinearLayout
+            android:id="@+id/quantity_selector_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/text_catalogo_categoria"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_decrease"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/ic_delete"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                android:padding="0dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.Circle"
+                />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/text_input_layout_quantity"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                app:boxStrokeColor="@color/purple_500"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text_quantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="1"
+                    android:gravity="center"
+                    android:imeOptions="actionDone"
+                    android:selectAllOnFocus="true"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_increase"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/ic_add"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                android:padding="0dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.Circle"
+                />
+        </LinearLayout>
+
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_agregar"
+            android:id="@+id/btn_agregar_con_cantidad"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Agregar"
@@ -72,12 +143,11 @@
             android:paddingBottom="8dp"
             android:layout_marginTop="12dp"
             app:cornerRadius="10dp"
-            app:icon="@drawable/ic_add"
             app:iconGravity="start"
             app:iconSize="18dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_catalogo_categoria" />
+            app:layout_constraintTop_toBottomOf="@+id/quantity_selector_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
