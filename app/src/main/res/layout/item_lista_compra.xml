@@ -1,65 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Shoptimize.ItemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp">
+    android:layout_margin="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp">
 
-    <ImageView
-        android:id="@+id/image_item"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:contentDescription="@string/app_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/avatar_1" />
-
-    <TextView
-        android:id="@+id/text_nombre"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/image_item"
-        app:layout_constraintTop_toTopOf="@id/image_item"
-        app:layout_constraintEnd_toStartOf="@id/text_total"
-        android:layout_marginStart="12dp"
-        android:ellipsize="end"
-        android:maxLines="1" />
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/text_total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/holo_green_dark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/text_nombre"
-        app:layout_constraintBottom_toBottomOf="@id/text_nombre"
-        android:layout_marginEnd="8dp" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_item"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerCrop"
+            android:src="@drawable/avatar_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.Circle" />
 
-    <TextView
-        android:id="@+id/text_fecha"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="@android:color/darker_gray"
-        app:layout_constraintStart_toStartOf="@id/text_nombre"
-        app:layout_constraintTop_toBottomOf="@id/text_nombre"
-        app:layout_constraintEnd_toStartOf="@id/btn_delete_lista"
-        android:layout_marginTop="4dp" />
+        <TextView
+            android:id="@+id/text_nombre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Body1"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/text_total"
+            app:layout_constraintStart_toEndOf="@id/image_item"
+            app:layout_constraintTop_toTopOf="@id/image_item" />
 
-    <ImageView
-        android:id="@+id/btn_delete_lista"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:contentDescription="Eliminar lista"
-        android:scaleType="centerInside"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_delete" />
+        <TextView
+            android:id="@+id/text_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Price"
+            app:layout_constraintBottom_toBottomOf="@id/text_nombre"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/text_nombre" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/text_fecha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Caption"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete_lista"
+            app:layout_constraintStart_toStartOf="@id/text_nombre"
+            app:layout_constraintTop_toBottomOf="@id/text_nombre" />
+
+        <ImageView
+            android:id="@+id/btn_delete_lista"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Eliminar lista"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_delete" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
