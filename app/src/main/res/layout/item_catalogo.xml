@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp">
+    style="@style/Widget.Shoptimize.ItemCard">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="8dp">
+        android:padding="12dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_product"
             android:layout_width="80dp"
-            android:layout_height="60dp"
-            android:scaleType="fitCenter"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
             android:src="@android:drawable/ic_menu_gallery"
-            android:background="#E5E5EA"
-            android:contentDescription="Imagen producto" />
+            android:background="@color/surface_variant_light"
+            android:contentDescription="Imagen producto"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Shoptimize.MediumComponent" />
 
         <TextView
             android:id="@+id/text_product_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="Nombre"
             android:textAlignment="center"
-            android:textColor="#222"
-            android:textSize="14sp"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Body2"
             android:maxLines="2"
             android:ellipsize="end" />
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

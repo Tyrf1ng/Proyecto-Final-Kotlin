@@ -6,36 +6,88 @@
     android:layout_height="match_parent"
     tools:context=".ui.reflow.ReflowFragment">
 
-    <SearchView
-        android:id="@+id/search_productos"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:queryHint="Buscar Productos"
+        android:layout_margin="12dp"
+        android:hint="Buscar productos"
+        app:startIconDrawable="@android:drawable/ic_menu_search"
+        app:endIconMode="clear_text"
+        style="@style/Widget.Shoptimize.TextInputLayout"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="8dp" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/search_productos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_catalogo"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginBottom="72dp"
+        android:clipToPadding="false"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
         app:layoutManager="GridLayoutManager"
-        app:spanCount="2"
-        app:layout_constraintTop_toBottomOf="@id/search_productos"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_layout"
+        app:spanCount="2" />
+
+    <LinearLayout
+        android:id="@+id/empty_state_catalogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="72dp" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📦"
+            android:textSize="64sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No hay productos"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Headline3"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agrega productos para comenzar"
+            android:textAppearance="@style/TextAppearance.Shoptimize.Body2" />
+
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_product"
+        style="@style/Widget.Shoptimize.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_input_add"
+        android:layout_margin="16dp"
         android:contentDescription="Agregar producto"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="16dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
